@@ -9,6 +9,8 @@
 
 # Please, export SPARK_LOCAL_HOSTNAME=localhost in bashrc first, thanks.
 
+# Input file is located in ~/data/banking/
+
 # To to
 #    flatten
 #    combine similar column labels
@@ -104,6 +106,9 @@ def combine(args):
         # Method 2
         # Work but field need to be flatten
         tempDF = spark.read.option("multiline", "true").json(each_table)
+        fields = flatten(tempDF.schema, None)
+        # ['_comment', 'data.peterjak.accounts.5c7072a835c3b.balance', 'data.peterjak.accounts.5c7072a835c3b.name', 'data.peterjak.accounts.5c7696db0745b.balance', 'data.peterjak.accounts.5c7696db0745b.name', 'data.peterjak.name', 'data.peterjak.nikajak.accounts.5c7000098525e.balance', 'data.peterjak.nikajak.name']
+
 
         # Method 3
         # Error
