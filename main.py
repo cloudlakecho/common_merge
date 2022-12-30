@@ -108,6 +108,7 @@ def combine(args):
         tempDF = spark.read.option("multiline", "true").json(each_table)
         fields = flatten(tempDF.schema, None)
         # ['_comment', 'data.peterjak.accounts.5c7072a835c3b.balance', 'data.peterjak.accounts.5c7072a835c3b.name', 'data.peterjak.accounts.5c7696db0745b.balance', 'data.peterjak.accounts.5c7696db0745b.name', 'data.peterjak.name', 'data.peterjak.nikajak.accounts.5c7000098525e.balance', 'data.peterjak.nikajak.name']
+        extracted = tempDF.select(fields)
 
 
         # Method 3
