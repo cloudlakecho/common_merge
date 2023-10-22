@@ -133,8 +133,6 @@ def combine(args):
             #   using longest common substring and longest common sub squence
 
             # Combine two tables
-
-
             mergedDFtemp = mergedDF.union(tempDF)
             mergedDF = mergedDFtemp
 
