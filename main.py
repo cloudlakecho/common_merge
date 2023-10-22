@@ -130,7 +130,11 @@ def combine(args):
 
             # To do
             #   Find similar field name
-            #   using longest common substring and longest common sub squence
+            #     First check column label and at most 14% of contents
+            #     (1) using longest common substring and longest common sub squence
+            #     (2) (exact) word search
+            #     (3) word vactor
+            #     (4) Large Language Model
 
             # Combine two tables
             mergedDFtemp = mergedDF.union(tempDF)
