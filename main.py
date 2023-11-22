@@ -1,23 +1,26 @@
-
+#!/usr/bin/python
+#
 # main.py -
 #     combine two tables
 #     obtaining the last five transactions performed by
 #	      a particular transactionID from a JSON file
-
+#
 # Cloud Cho, March 23, 2021
 # For Technical Assesment for Sr. Data Engineer position at Vanguard
-
+#
 # Please, export SPARK_LOCAL_HOSTNAME=localhost in bashrc first, thanks.
-
+#
 # Input file is located in ~/data/banking/
-
+#
 # To to
 #    flatten
 #    combine similar column labels
-
+#
 # Error
 #
-
+#
+# Runtime enviroment: Vanguard using Anaconda
+#
 # Reference:
 #    transactionID: https://stackoverflow.com/questions/56518655/obtaining-the-last-five-transactions-performed-by-a-particular-transactionid-fro
 import argparse, glob, os, pdb, sys
@@ -36,6 +39,8 @@ from pyspark.sql.functions import lit
 
 from datetime import datetime, date
 import pandas as pd
+
+from util import PrepDesk, AnalysisDesk
 
 
 READ_FILE = False
@@ -83,6 +88,12 @@ def main():
 
         python_lines = txt.filter(lambda line: 'python' in line.lower())
         print(python_lines.count())
+    else:
+        desk = PrepDesk("place_holder")
+        print(type(desk))
+        dataset = desk.create_table(option='empty')
+        print(type(dataset))
+        print(dataset.collect())
 
     mergedDF = combine(args)
 
