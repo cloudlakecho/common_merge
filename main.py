@@ -6,7 +6,7 @@
 #	      a particular transactionID from a JSON file
 #
 # Cloud Cho, March 23, 2021
-# For Technical Assesment for Sr. Data Engineer position at Vanguard
+#   For Technical Assesment for Sr. Data Engineer position at Vanguard
 #
 # Please, export SPARK_LOCAL_HOSTNAME=localhost in bashrc first, thanks.
 #
@@ -18,11 +18,15 @@
 #
 # Error
 #
-#
+# How to run
+#   example
+# 
 # Runtime enviroment: Vanguard using Anaconda
 #
 # Reference:
 #    transactionID: https://stackoverflow.com/questions/56518655/obtaining-the-last-five-transactions-performed-by-a-particular-transactionid-fro
+
+
 import argparse, glob, os, pdb, sys
 
 import pyspark
@@ -43,7 +47,7 @@ import pandas as pd
 from util import PrepDesk, AnalysisDesk
 
 
-READ_FILE = False
+READ_FILE = True
 
 
 sc = pyspark.SparkContext('local[*]')
@@ -88,12 +92,17 @@ def main():
 
         python_lines = txt.filter(lambda line: 'python' in line.lower())
         print(python_lines.count())
+
+        work_desk = util.PreDesk(app_name="Look")
+        data_large = work_desk.load_file(args.in_file)
     else:
         desk = PrepDesk("place_holder")
         print(type(desk))
         dataset = desk.create_table(option='empty')
         print(type(dataset))
         print(dataset.collect())
+
+
 
     mergedDF = combine(args)
 

@@ -1,4 +1,4 @@
-
+#
 # util.py - Task for dataset (DSS so only PySpark)
 # from October 14, 2023
 #
@@ -7,12 +7,17 @@
 #     Create`new table
 #     Flatten, join, add column, secondary key, new index
 #     Aggreate, reduce
+#
+# To do
+#     Please, check in the code
+#
 
 
 import os, pdb, sys
 import Pathlib  # Python 3.8 and later
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession
+
 
 # Set PySpark enviornment, create table and modify it
 class PrepDesk:
@@ -22,7 +27,7 @@ class PrepDesk:
         self.sc = SparkContext(conf=self.conf)
         self.spark = SparkSession.builder.getOrCreate()
 
-    # Load CSV, SQL file
+    # Load JSON, CSV, SQL file
     def load_file(self, input_file):
         if (input_file == None):
             self.rdd = self.sc.parallelize(range(100))
@@ -70,12 +75,28 @@ class PrepDesk:
         return self.rdd
 
 
+    def flatten(self, schema, prefix=None):
+        fields = []
+        for field in schema.fields:
+            name = prefix + '.' + field.name if prefix else field.name
+            dtype = field.dataType
+            if isinstance(dtype, ArrayType):
+                dtype = dtype.elementType
+
+            if isinstance(dtype, StructType):
+                fields += flatten(dtype, prefix=name)
+            else:
+                fields.append(name)
+
+        return fields
+
+
     # Flatten, join, add column, secondary key, new index
     def modify_table(self, tables, task='flatten', para=None):
         no_table = len(tables)
 
         if (task == 'flatten'):
-            pass
+            fields = flatten(self.schema, self.prefix)
 
         if (task == 'join'):
 
@@ -96,7 +117,7 @@ class PrepDesk:
                 INSERT COLUMN {} {} \
                 DEFAULT {}".format(para.title, para.col_name,
                 para.col_type, para.val))
-            self.sc
+
 
         if (task == "secondary key"):
             self.spark.sql("ALTAR TABLE {} \
@@ -112,22 +133,22 @@ class PrepDesk:
 
 
 # Aggreate
-class AnalysisDesk:
+class AnalysisDesk(PrepDesk):
     #
     # To do
     #   Make child class of PrepDesk
     #
     def __init__(self, dataset=None):
+        __super__.__init__()
         if (dataset == None):
             self.rdd = sc.parallelize(range(100))
         else:
             # RDD: Resilient Distributed Dataset
             self.rdd = dataset
 
-
     # Aggreate, reduce
 
-    # customer with certian transaction during period
+    # Customer with certian transaction during period
     def find_customer(self, period, amount, comp):
         # each customer sum during period
         rdd_part = self.rdd
@@ -144,12 +165,24 @@ class AnalysisDesk:
 
     # Customer account grwoth during month, year or specific period
     def growth(self, date_unit, period):
-       # each customer sum in each month or each year
-       pass
+        # Each customer during period
+        rdd_part = self.rdd
+        #   if date_unit is year, start becomes january 1 and
+        #   end December 31
+        rdd_part.filter(lambda x, y: y >= period.start)
+        rdd_part.filter(lambda x, y: y <= period.end)
+        # Find earliest and latest account info in each customer
+
+        # Latest minus earlist
+
+        pass
 
 
     # Find top saving or transaction in period
     def top_amount(self, period):
+       rdd_part.filter(lambda x, y: y >= period.start)
+       rdd_part.filter(lambda x, y: y <= period.end)
+
        # sc.sortByKey
        # find largest
        pass
