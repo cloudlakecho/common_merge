@@ -4,6 +4,7 @@
 #     combine two tables
 #     obtaining the last five transactions performed by
 #	      a particular transactionID from a JSON file
+#     document summeary or aggreation
 #
 # Cloud Cho, March 23, 2021
 #   For Technical Assesment for Sr. Data Engineer position at Vanguard
@@ -14,14 +15,18 @@
 #
 # To to
 #    flatten
-#    combine similar column labels
+#    combine similar column labels -
+#      label side: word vector, transformer
+#      content side (instead of label, content could give better characteristics)
+#       exact matching?, format?, word vector, transformer
 #
 # Error
 #
 # How to run
 #   example
-# 
-# Runtime enviroment: Vanguard using Anaconda
+#
+# Runtime enviroment: Vanguard using Anaconda - not working because Pathlib
+#    need to upgrade to Ubuntu 18.04
 #
 # Reference:
 #    transactionID: https://stackoverflow.com/questions/56518655/obtaining-the-last-five-transactions-performed-by-a-particular-transactionid-fro
@@ -154,7 +159,7 @@ def combine(args):
             #     (1) using longest common substring and longest common sub squence
             #     (2) (exact) word search
             #     (3) word vactor
-            #     (4) Large Language Model
+            #     (4) Large Language Model like Transformer, but this is word
 
             # Combine two tables
             mergedDFtemp = mergedDF.union(tempDF)
@@ -196,6 +201,15 @@ def getting_arg():
     args = parser.parse_args()
 
     return args
+
+
+def doc_sum(in_file):
+    # "fintech list from growjo 10000.txt"
+    #
+    # To do
+    #   count total words in each line
+    #   guess label on the first line
+    #   figure out missing column in each line
 
 
 if __name__ == '__main__':

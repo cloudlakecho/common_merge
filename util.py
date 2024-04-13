@@ -35,7 +35,7 @@ class PrepDesk:
             if (file_type == "txt"):
                 # Resilient Dirstirbute Database
                 self.rdd = self.sc.textfile(input_file)
-            elif (file_type == "json");
+            elif (file_type == "json"):
                self.rdd = self.spark.read.jason(input_file) \
                    .createOrReplaceTempView("customer")
             elif (file_type == "csv"):
