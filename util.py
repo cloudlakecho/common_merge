@@ -60,8 +60,12 @@ class PrepDesk:
             #
             # To do
             #     Find this method
-            self.rdd = self.sc.sql("CREATE TABLE ({} {} {})".format(
-                para.title, para.no_row, para.no_col))
+            # spark.sql("CREATE TABLE managed_us_delay_flights_tbl (date STRING,
+            # delay INT, distance INT, origin STRING, destination STRING)")
+            self.rdd = self.sc.sql("CREATE TABLE {} ({} {}, {} {}, {} {})".format(
+                para.title, para.col_name[0], para.col_type[0],
+                para.col_name[1], para.col_type[1],
+                para.col_name[2], para.col_type[2]))
         else:
             # Using SQL
             self.rdd = self.sc.sql("CREATE TABLE {} ( \
@@ -127,9 +131,16 @@ class PrepDesk:
             para.col_type))
         #
         # To do
-        #
+        #   selection on column as index
         if (task == "new index"):
-            pass
+            if (not (para.new_index in extracted.select('columnnames').collect())):
+                print ("{} column not existed, so setting index failed".format(
+                  para.newe_index))
+                ))
+            else:
+                pass
+
+
 
 
 # Aggreate
