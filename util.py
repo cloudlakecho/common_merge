@@ -8,6 +8,8 @@
 #     Flatten, join, add column, secondary key, new index
 #     Aggreate, reduce
 #
+# Assumption
+#   ID, amount, period start, period end
 # To do
 #     Please, check in the code
 #
@@ -58,8 +60,6 @@ class PrepDesk:
 
         if (option == 'empty'):
             #
-            # To do
-            #     Find this method
             # spark.sql("CREATE TABLE managed_us_delay_flights_tbl (date STRING,
             # delay INT, distance INT, origin STRING, destination STRING)")
             self.rdd = self.sc.sql("CREATE TABLE {} ({} {}, {} {}, {} {})".format(
@@ -138,19 +138,15 @@ class PrepDesk:
                   para.newe_index))
                 ))
             else:
-                pass
+                            pass
 
 
 
 
 # Aggreate
 class AnalysisDesk(PrepDesk):
-    #
-    # To do
-    #   Make child class of PrepDesk
-    #
     def __init__(self, dataset=None):
-        __super__.__init__()
+        super().__init__(dataset)
         if (dataset == None):
             self.rdd = sc.parallelize(range(100))
         else:
@@ -194,6 +190,8 @@ class AnalysisDesk(PrepDesk):
        rdd_part.filter(lambda x, y: y >= period.start)
        rdd_part.filter(lambda x, y: y <= period.end)
 
-       # sc.sortByKey
-       # find largest
-       pass
+       # sc.sortByKey and find largest
+       #  page 215 at Holden's Learning PySpark
+       #  https://stackoverflow.com/a/59134436/5595995
+       rdd_part.groupBy("ID").avg("amount")\
+         .orderBy(desc("avg(amount)")).show(1)
