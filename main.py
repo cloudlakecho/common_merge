@@ -19,14 +19,27 @@
 #      label side: word vector, transformer
 #      content side (instead of label, content could give better characteristics)
 #       exact matching?, format?, word vector, transformer
+#         transformer (large dataset for training)
+#
+#    ptint out label with most common content
+#    total number of col and row
+#
+#    all the "pass" call need to be implemented
 #
 # Error
+#   please check
 #
 # How to run
 #   example
+#     Text file reading
+#       python main.py --in_file "file:////home/cloud/Desktop/fintech list from growjo 10000.txt"
+#     CSV
+#       python main.py --in_file "file:////home/cloud/Desktop/fintech list from growjo 10000.csv"
 #
-# Runtime enviroment: Vanguard using Anaconda - not working because Pathlib
-#    need to upgrade to Ubuntu 18.04
+# Runtime enviroment:
+#    Vanguard using Anaconda -
+#      if you want to use Pathlib
+#      need to upgrade to Ubuntu 18.04
 #
 # Reference:
 #    transactionID: https://stackoverflow.com/questions/56518655/obtaining-the-last-five-transactions-performed-by-a-particular-transactionid-fro
@@ -50,13 +63,10 @@ from datetime import datetime, date
 import pandas as pd
 
 from util import PrepDesk, AnalysisDesk
+import util
 
-
-READ_FILE = True
-
-
-sc = pyspark.SparkContext('local[*]')
-spark = SparkSession.builder.getOrCreate()
+READ_FILE = False
+DEBUG = True
 
 
 
@@ -89,27 +99,65 @@ def main():
 
     if (READ_FILE):
         # sc = pyspark.SparkContext('local[*]')
+        # Cannot run multiple SparkContexts at once
+        #   so if you run this line in other file, it induced an error.
+        sc = pyspark.SparkContext('local[*]')
+        spark = SparkSession.builder.getOrCreate()
+
+
         # Read a text file from HDFS, a local file system (available on all nodes),
         # or any Hadoop-supported file system URI, and
         # return it as an RDD of Strings. The text files must be encoded as UTF-8.
-        txt = sc.textFile('file:////usr/share/doc/python/copyright')
-        print(txt.count())
+        in_txt = sc.textFile('file:////usr/share/doc/python/copyright')
+        print("Total line: {}".format(in_txt.count()))
 
-        python_lines = txt.filter(lambda line: 'python' in line.lower())
-        print(python_lines.count())
+        #
+        # To do
+        #   what this function do?
+        python_lines = in_txt.filter(lambda line: 'python' in line.lower())
+        print( "First \"python\" is at line {}?".format( python_lines.count() ) )
 
-        work_desk = util.PreDesk(app_name="Look")
+    if (args.choice == "read file"):
+        if (DEBUG):
+            pdb.set_trace()
+
+        work_desk = util.PrepDesk(app_name="Look")
         data_large = work_desk.load_file(args.in_file)
-    else:
+
+    elif (args.choice == "test"):
         desk = PrepDesk("place_holder")
         print(type(desk))
         dataset = desk.create_table(option='empty')
         print(type(dataset))
         print(dataset.collect())
 
+    elif (args.choice == "merge"):
+        mergedDF = combine(args)
+
+    # print out label with most commone contents under the label
+    elif (args.choice == "most common"):
+        pass
+
+    # table total row and column
+    elif (args.choice == "size"):
+        pass
 
 
-    mergedDF = combine(args)
+    else:
+       work_desk = util.PrepDesk(app_name="Look")
+       data_large = work_desk.load_file(args.in_file)
+
+       if (DEBUG):
+           info_size = 10
+           print ("First {} data".format(info_size))
+           print (data_large.take(info_size))
+
+       anal_desk = util.AnalysisDesk(dataset=data_large)
+       #
+       # To do
+       #   given_period need to implement using "struct"
+       #   please test at 00-essay-3.py 
+       anal_desk.growth(period=given_period)
 
     pdb.set_trace()
 
@@ -118,10 +166,17 @@ def combine(args):
     # go through JSON files in the folder
 
     # pdb.set_trace()
+    file_type = "*.json"
+    if (args.in_folder == None):
+        print ("{} folder not exist".format(args.in_folder))
+        return 0
 
-    tables = glob.glob(os.path.join(args.in_folder, "*.json"))
+    tables = glob.glob(os.path.join(args.in_folder, file_type))
+    if len(tables == 0):
+        print ("{} not in the {}".format(file_type, args.in_folder))
+        return 0
+
     for idx, each_table in enumerate(tables):
-
 
         # Method 1
         # Not common JSON, it should be JSONL type file
@@ -160,6 +215,7 @@ def combine(args):
             #     (2) (exact) word search
             #     (3) word vactor
             #     (4) Large Language Model like Transformer, but this is word
+            #       also need to train with large dataset?
 
             # Combine two tables
             mergedDFtemp = mergedDF.union(tempDF)
@@ -210,7 +266,8 @@ def doc_sum(in_file):
     #   count total words in each line
     #   guess label on the first line
     #   figure out missing column in each line
+    return 0
 
 
 if __name__ == '__main__':
-  main()
+    main()

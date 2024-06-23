@@ -3,20 +3,21 @@
 # from October 14, 2023
 #
 # Funtion:
-#     Load CSV, SQL file
+#     Load TXT, CSV, SQL file
 #     Create`new table
 #     Flatten, join, add column, secondary key, new index
 #     Aggreate, reduce
 #
 # Assumption
 #   ID, amount, period start, period end
+#
 # To do
 #     Please, check in the code
 #
 
 
 import os, pdb, sys
-import Pathlib  # Python 3.8 and later
+# import Pathlib  # Python 3.8 and later
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession
 
@@ -24,19 +25,29 @@ from pyspark.sql import SparkSession
 # Set PySpark enviornment, create table and modify it
 class PrepDesk:
     def __init__(self, app_name=None):
-        self.conf = (SparkConf().setMaster('local').setAppName(app_name)
-            .set("spark.executor.memory", "lg"))
+        #
+        # Error
+        #   Exception: Java gateway process exited before sending its port number
+        #
+        # paranthesis just multi line with point possible
+        # self.conf = (SparkConf().setMaster('local').setAppName(app_name).
+        #     set("spark.executor.memory", "lg"))
+        self.conf = SparkConf().setMaster('local[*]')
+        # Cannot run multiple SparkContexts at once
         self.sc = SparkContext(conf=self.conf)
         self.spark = SparkSession.builder.getOrCreate()
 
-    # Load JSON, CSV, SQL file
+    # Load JSON, CSV, SQL(DB), TXT file
     def load_file(self, input_file):
         if (input_file == None):
             self.rdd = self.sc.parallelize(range(100))
         else:
+            # Could be error, Pathlib would be robust
+            file_type = input_file.split('.')[1]
             if (file_type == "txt"):
                 # Resilient Dirstirbute Database
-                self.rdd = self.sc.textfile(input_file)
+                # RDDs are schema-less data structures
+                self.rdd = self.sc.textFile(input_file)
             elif (file_type == "json"):
                self.rdd = self.spark.read.jason(input_file) \
                    .createOrReplaceTempView("customer")
@@ -44,7 +55,11 @@ class PrepDesk:
                 pass
 
             else:
+                # To do
+                #   some text file don't have file type in file name
+                #
                 print ("Not readable")
+
                 sys.exit(1)
 
 
@@ -122,13 +137,12 @@ class PrepDesk:
                 DEFAULT {}".format(para.title, para.col_name,
                 para.col_type, para.val))
 
-
         if (task == "secondary key"):
             self.spark.sql("ALTAR TABLE {} \
-            INSERT COLUMN {} {} \
-            DEFAULT {} \
-            SECONDAR KEY".format (para.title, para.col_name,
-            para.col_type))
+                INSERT COLUMN {} {} \
+                DEFAULT {} \
+                SECONDAR KEY".format (para.title, para.col_name,
+                para.col_type))
         #
         # To do
         #   selection on column as index
@@ -136,9 +150,9 @@ class PrepDesk:
             if (not (para.new_index in extracted.select('columnnames').collect())):
                 print ("{} column not existed, so setting index failed".format(
                   para.newe_index))
-                ))
+
             else:
-                            pass
+                pass
 
 
 
@@ -146,6 +160,10 @@ class PrepDesk:
 # Aggreate
 class AnalysisDesk(PrepDesk):
     def __init__(self, dataset=None):
+        #
+        # Error spot
+        #   ValueError: Cannot run multiple SparkContexts at once; existing SparkContext(app=pyspark-shell, master=local[*]) created by __init__ at /home/cloud/computer_programming/python/common_merge/util.py:37
+        #
         super().__init__(dataset)
         if (dataset == None):
             self.rdd = sc.parallelize(range(100))
