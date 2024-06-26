@@ -12,9 +12,22 @@ import util
 def parse_args():
     args = argparse("Title": , "Comment": "Unit test of function")
     args.add("--input_file", type=str)
-
+    args.add("--function", type=str)  # if "all" it will run all unit test
     return args
 
+
+def init_spark():
+    #
+    # Error
+    #   Exception: Java gateway process exited before sending its port number
+    #
+    # paranthesis just multi line with point possible
+    # self.conf = (SparkConf().setMaster('local').setAppName(app_name).
+    #     set("spark.executor.memory", "lg"))
+    self.conf = SparkConf().setMaster('local[*]')
+    # Cannot run multiple SparkContexts at once
+    self.sc = SparkContext(conf=self.conf)
+    self.spark = SparkSession.builder.getOrCreate()
 
 # To find top saving in last quarter
 def test_find_customer():
@@ -40,4 +53,24 @@ def flatten():
     rdd.keys().collect()
 
     pdb.set_trace()
-    
+
+
+def main():
+
+    init_spark()
+
+    args = parse_args()
+    if (args.function == "all"):
+        test_find_customer()
+        flatten()
+    elif (args.function == "find customer"):
+        test_find_customer()
+    elif (args.function == "flatten"):
+        flatten()
+    else:
+        print ("Please, choose among the choices.")
+
+
+
+def __name__ == '__main__':
+    main()

@@ -25,17 +25,7 @@ from pyspark.sql import SparkSession
 # Set PySpark enviornment, create table and modify it
 class PrepDesk:
     def __init__(self, app_name=None):
-        #
-        # Error
-        #   Exception: Java gateway process exited before sending its port number
-        #
-        # paranthesis just multi line with point possible
-        # self.conf = (SparkConf().setMaster('local').setAppName(app_name).
-        #     set("spark.executor.memory", "lg"))
-        self.conf = SparkConf().setMaster('local[*]')
-        # Cannot run multiple SparkContexts at once
-        self.sc = SparkContext(conf=self.conf)
-        self.spark = SparkSession.builder.getOrCreate()
+        pass
 
     # Load JSON, CSV, SQL(DB), TXT file
     def load_file(self, input_file):

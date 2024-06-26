@@ -14,6 +14,11 @@
 # Input file is located in ~/data/banking/
 #
 # To to
+#    merge dev branch to master - to share code in job application
+#      add all function unit test in util_test.py
+#      merge to master branch
+#      clean code in master branch like error and debug comment
+#   
 #    flatten
 #    combine similar column labels -
 #      label side: word vector, transformer
@@ -95,6 +100,10 @@ DEBUG = True
 
 # 3rd tiral
 def main():
+    # If initialize in the Class call, it would induce multiple SparkContexts
+    #   error
+    init_spark()
+
     args = getting_arg()
 
     if (READ_FILE):
@@ -156,10 +165,24 @@ def main():
        #
        # To do
        #   given_period need to implement using "struct"
-       #   please test at 00-essay-3.py 
+       #   please test at 00-essay-3.py
        anal_desk.growth(period=given_period)
 
     pdb.set_trace()
+
+
+def init_spark():
+    #
+    # Error
+    #   Exception: Java gateway process exited before sending its port number
+    #
+    # paranthesis just multi line with point possible
+    # self.conf = (SparkConf().setMaster('local').setAppName(app_name).
+    #     set("spark.executor.memory", "lg"))
+    self.conf = SparkConf().setMaster('local[*]')
+    # Cannot run multiple SparkContexts at once
+    self.sc = SparkContext(conf=self.conf)
+    self.spark = SparkSession.builder.getOrCreate()
 
 
 def combine(args):
