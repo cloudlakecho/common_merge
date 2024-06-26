@@ -17,15 +17,30 @@
 
 
 import os, pdb, sys
-# import Pathlib  # Python 3.8 and later
+if (int(sys.version_info.major) > 3) or \
+    ((int(sys.version_info.major) == 3) and \
+    (int(sys.version_info.minor) >= 8)):
+    import Pathlib  # Python 3.8 and later
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession
+
+#
+# Error
+#   Exception: Java gateway process exited before sending its port number
+#
+# paranthesis just multi line with point possible
+# self.conf = (SparkConf().setMaster('local').setAppName(app_name).
+#     set("spark.executor.memory", "lg"))
+conf = SparkConf().setMaster('local[*]')
+# Cannot run multiple SparkContexts at once
+sc = SparkContext(conf=conf)
+spark = SparkSession.builder.getOrCreate()
 
 
 # Set PySpark enviornment, create table and modify it
 class PrepDesk:
     def __init__(self, app_name=None):
-        pass
+        self.sc, self.spark = sc, spark
 
     # Load JSON, CSV, SQL(DB), TXT file
     def load_file(self, input_file):
