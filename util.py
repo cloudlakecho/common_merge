@@ -24,6 +24,8 @@ if (int(sys.version_info.major) > 3) or \
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession
 
+DEBUG = True
+
 #
 # Error
 #   Exception: Java gateway process exited before sending its port number
@@ -44,15 +46,38 @@ class PrepDesk:
 
     # Load JSON, CSV, SQL(DB), TXT file
     def load_file(self, input_file):
+        self.text_info = dict()
         if (input_file == None):
-            self.rdd = self.sc.parallelize(range(100))
+            no_partitian = 10
+            # need to be key and value pair so "zip" used
+            #   reference: https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.SparkContext.parallelize.html
+            self.rdd = self.sc.parallelize(
+               zip(range(100), range(100)), numSlices=no_partitian)
+
+            if (DEBUG):
+                pdb.set_trace()
+
         else:
             # Could be error, Pathlib would be robust
             file_type = input_file.split('.')[1]
             if (file_type == "txt"):
+                self.txt_info = self.text_file_modify(input_file)
+                #
+                # To do
+                #   truncate until header
+                #
+                if (DEBUG):
+                    pdb.set_trace()
+
                 # Resilient Dirstirbute Database
                 # RDDs are schema-less data structures
-                self.rdd = self.sc.textFile(input_file)
+                #
+                # To do
+                #   check the RDD looks like
+                #
+                self.rdd_spark = self.sc.textFile(input_file)
+
+
             elif (file_type == "json"):
                self.rdd = self.spark.read.jason(input_file) \
                    .createOrReplaceTempView("customer")
@@ -70,6 +95,41 @@ class PrepDesk:
 
         return self.rdd
 
+    # Remove comment, header and
+    def text_file_modify(self, input_file):
+        col_count_cur = 0
+        col_count_pre = 0
+        header, first_row = str(), str()
+        line_idx = 0
+        #
+        # To do
+        #   'file:////home/...' -> '/home/...'
+        #    there should be a function
+        first_letter = input_file.split('/')[0]
+        if (first_letter == "file"):
+            input_file = input_file[9:]
+
+        with open(input_file, "r") as in_file:
+            for line in in_file:
+
+                if (DEBUG):
+
+
+                col_count_cur = len(line.split(' '))
+                # Assumption first row is matched with header
+                #   no None or NULL value in first row
+                if (line_idx != 0):
+                    if (col_count_cur == col_count_pre):
+                        first_row = line
+                        break
+                col_count_pre = col_count_cur
+                line_idx += 1
+                header = line
+
+        return {"no of col": col_count_cur,\
+            "header": header, \
+            "first_row": first_row,
+            "line index of header": line_idx}
 
     # Read exist table and create new table
     def create_table(self, exist_table, option='empty', para=None):
@@ -159,8 +219,24 @@ class PrepDesk:
             else:
                 pass
 
+    # print out label with most commone contents under the label
+    def content_guess(self, rdd_external = None):
+        if (not rdd_external):
+            rdd_external.countByValue()
+        else:
+            self.rdd.keys()
+            self.rdd.countByValue()
 
-
+        # find max occurance in each key
+    def table_size(self, rdd_external = None):
+        no_key, no_row = None, None
+        if (not rdd_external):
+            no_key = len(rdd_external.keys().collect())
+            no_row = rdd_external.count()
+        else:
+            no_key = len(self.rdd.keys().collect())
+            no_row = self.rdd.count()
+        return {"total label": no_key, "no of row": no_row}
 
 # Aggreate
 class AnalysisDesk(PrepDesk):
@@ -218,3 +294,11 @@ class AnalysisDesk(PrepDesk):
        #  https://stackoverflow.com/a/59134436/5595995
        rdd_part.groupBy("ID").avg("amount")\
          .orderBy(desc("avg(amount)")).show(1)
+
+    # similar to content_guess function
+    #   group by same column contents in one (specific) label
+    #     how choos label? least number of single member groups
+    def find_group(self):
+        # Call other function
+        #   ref: https://stackoverflow.com/questions/63514386/use-of-self-when-calling-functions-within-a-class
+        super.content_guess(self.rdd_external)

@@ -18,7 +18,7 @@
 #      add all function unit test in util_test.py
 #      merge to master branch
 #      clean code in master branch like error and debug comment
-#   
+#
 #    flatten
 #    combine similar column labels -
 #      label side: word vector, transformer
@@ -26,7 +26,10 @@
 #       exact matching?, format?, word vector, transformer
 #         transformer (large dataset for training)
 #
-#    ptint out label with most common content
+#    file reading
+#      cut the comment and header of the example text file
+#        PySpark text file reading still requred key and value pair
+#    ptint out label with most common content - text_file_modify in util file
 #    total number of col and row
 #
 #    all the "pass" call need to be implemented
@@ -37,7 +40,7 @@
 # How to run
 #   example
 #     Text file reading
-#       python main.py --in_file "file:////home/cloud/Desktop/fintech list from growjo 10000.txt"
+#       python main.py --in_file "file:////home/cloud/Desktop/fintech list from growjo 10000.txt" --choice size
 #     CSV
 #       python main.py --in_file "file:////home/cloud/Desktop/fintech list from growjo 10000.csv"
 #
@@ -54,6 +57,7 @@ import argparse, glob, os, pdb, sys
 
 import pyspark
 import pyspark.sql.functions as f
+from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession
 from pyspark.sql import Row
 from pyspark.sql.types import StructType, ArrayType
@@ -102,7 +106,7 @@ DEBUG = True
 def main():
     # If initialize in the Class call, it would induce multiple SparkContexts
     #   error
-    init_spark()
+    # init_spark()
 
     args = getting_arg()
 
@@ -145,12 +149,15 @@ def main():
 
     # print out label with most commone contents under the label
     elif (args.choice == "most common"):
-        pass
+        work_desk = util.PrepDesk(app_name="Look")
+        data_large = work_desk.load_file(args.in_file)
+        work_desk.content_guess(rdd_external = data_large)
 
     # table total row and column
     elif (args.choice == "size"):
-        pass
-
+        work_desk = util.PrepDesk(app_name="Look")
+        data_large = work_desk.load_file(args.in_file)
+        result = work_desk.table_size(rdd_external = data_large)
 
     else:
        work_desk = util.PrepDesk(app_name="Look")
@@ -179,10 +186,10 @@ def init_spark():
     # paranthesis just multi line with point possible
     # self.conf = (SparkConf().setMaster('local').setAppName(app_name).
     #     set("spark.executor.memory", "lg"))
-    self.conf = SparkConf().setMaster('local[*]')
+    conf = SparkConf().setMaster('local[*]')
     # Cannot run multiple SparkContexts at once
-    self.sc = SparkContext(conf=self.conf)
-    self.spark = SparkSession.builder.getOrCreate()
+    sc = SparkContext(conf=conf)
+    spark = SparkSession.builder.getOrCreate()
 
 
 def combine(args):
@@ -274,8 +281,8 @@ def getting_arg():
         help='input folder name')
     parser.add_argument('--out_file', dest='out_file',
         help='output file name')
-    parser.add_argument('--choice', dest='choice', type=int,
-        help='data type choice')
+    parser.add_argument('--choice', dest='choice', type=str,
+        help='task choice')
 
     args = parser.parse_args()
 
