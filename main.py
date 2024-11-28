@@ -40,7 +40,7 @@
 # How to run
 #   example
 #     Text file reading
-#       python main.py --in_file "file:////home/cloud/Desktop/fintech list from growjo 10000.txt" --choice size
+#       python main.py --in_file "file:////home/cloud/Desktop/fintech list from growjo 10000.txt" --choice "size"
 #     CSV
 #       python main.py --in_file "file:////home/cloud/Desktop/fintech list from growjo 10000.csv"
 #
@@ -130,9 +130,10 @@ def main():
         python_lines = in_txt.filter(lambda line: 'python' in line.lower())
         print( "First \"python\" is at line {}?".format( python_lines.count() ) )
 
+    if (DEBUG):
+        pdb.set_trace()
+
     if (args.choice == "read file"):
-        if (DEBUG):
-            pdb.set_trace()
 
         work_desk = util.PrepDesk(app_name="Look")
         data_large = work_desk.load_file(args.in_file)
@@ -243,7 +244,7 @@ def combine(args):
             #     First check column label and at most 14% of contents
             #     (1) using longest common substring and longest common sub squence
             #     (2) (exact) word search
-            #     (3) word vactor
+            #     (3) word vector
             #     (4) Large Language Model like Transformer, but this is word
             #       also need to train with large dataset?
 

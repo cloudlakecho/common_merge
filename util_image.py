@@ -9,6 +9,7 @@
 
 
 """
+
   To do
     test using "unit_test.py"
 
@@ -17,6 +18,7 @@
   reference:
     image extraction from PDF
       https://askubuntu.com/a/150106/789450
+
 """
 
 import random
@@ -47,12 +49,21 @@ def extract_image(args):
         #
         # Error spot
         #   It should be like "input file directory"/extracted_image
-        # 
-        image_root = os.path.join(dirnames, 'extracted_image')
+        #
+        dir_cur = os.path.dirname(files_to_use)
+        image_root = os.path.join(dir_cur, 'extracted_image')
+
+        if (DEBUGGING):
+            pdb.set_trace()
+        #
+        # Error
+        #   SyntaxError: EOL while scanning string literal
+        #
         try:
-            # subprocess.run(['pdfimages`, option, option_format,\
-            #   i, image_root])
-            subprocess.run(['cat', i])
+            subprocess.run(
+              ['pdfimages`, option, option_format, i, image_root]
+            )
+            # subprocess.run(['cat', i])
         except Exception as e:
             print (files, e.args)
         else:

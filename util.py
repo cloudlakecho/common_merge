@@ -14,6 +14,8 @@
 # To do
 #     Please, check in the code
 #
+# Runtime environment
+#   vanguard in Anaconda
 
 
 import os, pdb, sys
@@ -109,16 +111,33 @@ class PrepDesk:
         if (first_letter == "file"):
             input_file = input_file[9:]
 
+        if (DEBUG):
+            pdb.set_trace()
+
         with open(input_file, "r") as in_file:
             for line in in_file:
 
-                if (DEBUG):
 
-
+                #
+                #
+                #
                 col_count_cur = len(line.split(' '))
+
+                if (DEBUG):
+                    print (line)
+                    print (col_count_cur)
+
                 # Assumption first row is matched with header
                 #   no None or NULL value in first row
-                if (line_idx != 0):
+                #
+                # To do
+                #   empty line skipping
+                #   first line
+                #     - ignore comment section using regular expression
+                #     - somehow figure out split first row 
+                #         how to identify first line of actual data?
+                #
+                if (line_idx != 0 and line != '\n'):
                     if (col_count_cur == col_count_pre):
                         first_row = line
                         break
